@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  jackett:
+    image: linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      # 当前用户的 uid 和 gid，可以在终端运行 id 来查看，大部分时候都是 1000
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - AUTO_UPDATE=true #optional
+    volumes:
+      - ./data:/config
+      - ./blackhole:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+
+# flaresolverr 服务，用来跳过某些站点的人机验证
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=Asia/Shanghai
+    restart: unless-stopped

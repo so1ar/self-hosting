@@ -1,0 +1,43 @@
+version: "2.4"
+
+services:
+# FreshRSS 服务
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      # 数据文件存放路径
+      - ./data:/var/www/FreshRSS/data
+      # 可选的 FreshRSS 扩展文件存放路径
+      - ./extensions:/var/www/FreshRSS/extensions
+    ports:
+      # 开放端口
+      - "8080:80"
+    environment:
+      # 时区
+      TZ: Asia/Shanghai
+      # 自动化任务，在每个小时的第 2 和第 32 分钟执行一次同步
+      CRON_MIN: '2,32'
+
+# RSSHub 服务
+  rsshub:
+    image: diygod/rsshub:chromium-bundled
+    restart: always
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: 'redis://redis:6379/'
+      # 如有其他 RSSHub 配置也可添加到这里
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

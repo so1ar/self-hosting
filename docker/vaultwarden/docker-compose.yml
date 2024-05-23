@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+
+  # Vaultwarden 服务
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: always
+    environment:
+      # 允许账号注册，在设置账号后，需将此项设为 false
+      SIGNUPS_ALLOWED: 'true'
+      # 需要改成自己的域名
+      DOMAIN: "https://passwd.example.com"
+    ports:
+      - '127.0.0.1:7080:80'
+    volumes:
+      - vaultwarden-data:/data/
+
+  # Vaultwarden 自动备份服务
+  vaultwarden-backup:
+    image: bruceforce/vaultwarden-backup
+    restart: on-failure
+    init: true
+    depends_on:
+      - vaultwarden
+    volumes:
+      - vaultwarden-data:/data/
+      # 这里改成自己的备份文件夹
+      - /path/to/your/backup_folder:/backup/
+    env_file:
+      # 环境变量文件
+      - .env
+
+volumes:
+  vaultwarden-data:
+    name: vaultwarden-data

@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-config:/config
+      - ./caddy-data:/data
+    environment:
+      EMAIL: "email@example.com"                 # 用来自动续期证书的邮箱，要改成自己的邮箱。
+      LOG_FILE: "/data/access.log"

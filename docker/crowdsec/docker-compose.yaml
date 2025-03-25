@@ -1,0 +1,41 @@
+---
+services:
+  crowdsec:
+    # 使用 journald 的发行版需要用 latest-debian tag
+    # image: crowdsecurity/crowdsec:latest
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    restart: unless-stopped
+    environment:
+      # 安装的规则集，根据自己的需要添加
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/iptables crowdsecurity/sshd crowdsecurity/traefik LePresidente/authelia"
+      ENROLL_KEY: ${ENROLL_KEY}
+      TZ: Asia/Shanghai
+      GID: "${GID-1000}"
+    volumes:
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./config:/etc/crowdsec
+      - ./data:/var/lib/crowdsec/data/
+      # 使用 journald 的发行版需要映射下面的目录
+      # - /var/log/journal:/var/log/host:ro
+      # 系统 SSH 登录日志路径，根据自己需要修改
+      - /var/log/secure:/var/log/auth.log:ro
+      # traefik 日志的 docker 卷
+      - traefik-log:/var/log/traefik
+      # authelia 日志的 docker 卷
+      - authelia-log:/var/log/authelia
+      # 可以根据需要自行映射其他服务日志的文件
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      frontend:
+
+networks:
+  frontend:
+    external: true
+
+volumes:
+  traefik-log:
+    external: true
+  authelia-log:
+    external: true

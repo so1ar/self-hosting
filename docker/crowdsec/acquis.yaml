@@ -1,0 +1,25 @@
+# 读取 SSH 日志
+filenames:
+  - /var/log/auth.log
+labels:
+  type: syslog
+---
+# 读取 journalctl 的 SSH 日志
+source: journalctl
+journalctl_filter: 
+    - "--directory=/var/log/host/"
+    - "_SYSTEMD_UNIT=ssh.service"
+labels:
+    type: syslog
+---
+# 读取 traefik 日志
+filenames:
+  - /var/log/traefik/*.log
+labels:
+  type: traefik
+---
+# 读取 authelia 日志
+filenames:
+ - /var/log/authelia/authelia.log
+labels:
+  type: authelia

@@ -1,0 +1,68 @@
+---
+services:
+# FreshRSS 服务
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      # 数据文件存放路径
+      - ./data:/var/www/FreshRSS/data
+      # 可选的 FreshRSS 扩展文件存放路径
+      - ./extensions:/var/www/FreshRSS/extensions
+    # ports:
+    #   # 开放端口
+    #   - "8080:80"
+    environment:
+      # 时区
+      TZ: Asia/Shanghai
+      # 自动化任务，在每个小时的第 2 和第 32 分钟执行一次同步
+      CRON_MIN: '2,32'
+    labels:
+      # 参考 https://github.com/FreshRSS/FreshRSS/blob/edge/Docker/freshrss/docker-compose-proxy.yml
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend"
+      - "traefik.http.middlewares.freshrssM1.compress=true"
+      - "traefik.http.middlewares.freshrssM2.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.freshrssM2.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.freshrssM2.headers.frameDeny=true"
+      - "traefik.http.middlewares.freshrssM2.headers.referrerPolicy=no-referrer-when-downgrade"
+      - "traefik.http.middlewares.freshrssM2.headers.stsSeconds=31536000"
+      - "traefik.http.routers.freshrss.entryPoints=https"
+      - "traefik.http.routers.freshrss.tls.certResolver=cloudflare"
+      - "traefik.http.routers.freshrss.tls=true"
+      - "traefik.http.routers.freshrss.middlewares=freshrssM1,freshrssM2"
+      # 改成自己的域名
+      - "traefik.http.routers.freshrss.rule=Host(`rss.example.com`)"
+
+# RSSHub 服务
+  rsshub:
+    image: diygod/rsshub:chromium-bundled
+    restart: always
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: 'redis://redis:6379/'
+      # 如有其他 RSSHub 配置也可添加到这里
+
+  valkey:
+    # image: redis:alpine
+    image: valkey/valkey
+    container_name: rsshub_valkey
+    restart: unless-stopped
+    volumes:
+      - valkey-data:/data
+    networks:
+      - backend
+
+networks:
+  frontend:
+    external: true
+  backend:
+    external: true
+
+volumes:
+  valkey-data:

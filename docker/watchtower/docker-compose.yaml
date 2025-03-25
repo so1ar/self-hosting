@@ -1,4 +1,4 @@
-version: "3"
+---
 services:
   watchtower:
     image: containrrr/watchtower
@@ -11,3 +11,9 @@ services:
       - WATCHTOWER_ROLLING_RESTART=true
       - WATCHTOWER_DISABLE_CONTAINERS=jackett
       - WATCHTOWER_POLL_INTERVAL=86400
+    networks:
+        - backend
+
+networks:
+  backend:
+    external: true

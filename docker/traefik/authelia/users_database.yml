@@ -1,0 +1,14 @@
+---
+users:
+  demo_user:
+    disabled: false
+    # 展示的用户名
+    displayname: 'demo_user'
+    # Password is test
+    password: '$argon2id$v=19$m=65536,t=3,p=4$Ku0DILVaodPmWRb/pI/ZRA$WEB3CbcGH3aMqwDgs1kUCkWm73E/l5YCSwzhGZQnNwE'
+    # Email 改成自己的
+    email: 'email@example.com'
+    groups:
+      - 'admins'
+      - 'dev'
+...

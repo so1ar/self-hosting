@@ -1,0 +1,67 @@
+---
+server:
+  address: 'tcp://:9091'
+
+log:
+  level: 'info'
+  file_path: '/var/log/authelia/authelia.log'
+
+totp:
+  issuer: 'authelia.com'
+
+theme: 'dark'
+
+identity_validation:
+  reset_password:
+    jwt_secret: ''
+
+# duo_api:
+#  hostname: api-123456789.example.com
+#  integration_key: ABCDEF
+#  # This secret can also be set using the env variables AUTHELIA_DUO_API_SECRET_KEY_FILE
+#  secret_key: 1234567890abcdefghifjkl
+
+authentication_backend:
+  file:
+    path: '/config/users_database.yml'
+    password:
+      algorithm: argon2
+
+access_control:
+  default_policy: 'deny'
+  rules:
+    # 对所有子域名开启账号密码验证，把域名改成自己的域名
+    - domain: '*.example.com'
+      policy: 'one_factor'
+
+session:
+  # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
+  secret: ''
+
+  cookies:
+    - name: 'authelia_session'
+      domain: 'example.com'  # 应该填自己的根域名
+      authelia_url: 'https://auth.example.com:443' # 应该填 Traefik 反代 Authelia 的域名
+      expiration: '1 hour'
+      remember_me: '3 months'
+
+  # redis:
+  #   host: 'redis'
+  #   port: 6379
+  #   # This secret can also be set using the env variables AUTHELIA_SESSION_REDIS_PASSWORD_FILE
+  #   # password: authelia
+
+regulation:
+  max_retries: 3
+  find_time: '2 minutes'
+  ban_time: '5 minutes'
+
+storage:
+  encryption_key: ''
+  local:
+    path: '/config/db.sqlite3'
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
+...

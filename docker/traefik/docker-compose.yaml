@@ -1,0 +1,108 @@
+---
+services:
+  traefik:
+    image: traefik:v3
+    container_name: traefik
+    ports:
+      # http 端口
+      - "80:80"
+      # https 端口
+      - "443:443"
+      # 自定义端口
+      - "59402:59402"
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    networks:
+      frontend:
+        ipv4_address: 172.25.0.250
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # 读取 docker socket
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 静态配置文件
+      - ./config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      # 证书存储路径
+      - ./data/certs:/var/traefik/certs:rw
+      # 存储 Traefik 日志的 docker 卷，用来被 Crowdsec 读取
+      - traefik-log:/var/log/traefik
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-secure.entrypoints=traefik"
+      # 用来访问 Traefik 后台的域名，需要改成自己域名
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.example.com`)"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      # 申请通配符域名证书，也要记得改成自己的域名
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+      # 定义 crowdsec 中间件，要记得配置好 bouncer 的密钥
+      - "traefik.http.middlewares.crowdsec.plugin.crowdsec-bouncer.enabled=true"
+      - "traefik.http.middlewares.crowdsec.plugin.crowdsec-bouncer.crowdseclapikey=${CROWDSEC_TRAEFIK_BOUNCER_API_KEY}"
+      - "traefik.http.middlewares.crowdsec.plugin.crowdsec-bouncer.crowdseclapischeme=http"
+      - "traefik.http.middlewares.crowdsec.plugin.crowdsec-bouncer.crowdseclapihost=crowdsec:8080"
+      # authelia 身份认证，记得要配置好 authelia 之后再取消下面的注释，不然可能会把自己拦在门外
+      # - "traefik.http.routers.traefik-secure.middlewares=authelia@docker"
+
+  # 用来转换证书文件，不需要可以删掉
+  certsdump:
+    image: ldez/traefik-certs-dumper
+    container_name: dumper
+    depends_on:
+      - traefik
+    entrypoint: sh -c 'apk add jq;
+      while ! [ -e /data/acme.json ] || ! [ `jq ".[] | .Certificates | length" /data/acme.json` != 0 ];
+      do
+      sleep 300;
+      done &&
+      traefik-certs-dumper file --version v2 --domain-subdir --clean=false --watch --source ./acme.json --dest .'
+    volumes:
+      - ./data/certs:/data
+    restart: 'unless-stopped'
+    networks:
+      - backend
+    working_dir: /data
+
+  # authelia 身份认证
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    volumes:
+      - ./authelia:/config
+      # 存放 authelia 日志的 docker 卷，用来被 Crowdsec 读取
+      - authelia-log:/var/log/authelia
+    networks:
+      - frontend
+    environment:
+      # 三个密钥文件，记得创建并使用高强度随机密码
+      - AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=/config/secrets/JWT_SECRET
+      - AUTHELIA_SESSION_SECRET_FILE=/config/secrets/SESSION_SECRET
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/config/secrets/STORAGE_ENCRYPTION_KEY
+      - TZ=Asia/Shanghai
+    labels:
+      - "traefik.enable=true"
+      # 跳转到身份认证的域名，改成自己的域名
+      - "traefik.http.routers.authelia.rule=Host(`auth.example.com`)"
+      - "traefik.http.routers.authelia.entrypoints=https"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.routers.authelia.tls.certresolver=cloudflare"
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/authz/forward-auth"
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+    restart: 'unless-stopped'
+    healthcheck:
+      ## In production the healthcheck section should be commented.
+      disable: true
+
+networks:
+  frontend:
+    external: true
+  backend:
+    external: true
+
+volumes:
+  traefik-log:
+    external: true
+  authelia-log:
+    external: true

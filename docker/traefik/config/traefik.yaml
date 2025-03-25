@@ -1,0 +1,60 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# 访问日志路径
+accessLog:
+  filePath: "/var/log/traefik/traefik.log"
+
+api:
+  dashboard: true
+  debug: true
+
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+
+  https:
+    address: :443
+    # Crowdsec bouncer 中间件，配置好之后再取消下面的注释
+    # http:
+    #   middlewares:
+    #     - crowdsec@docker
+
+  traefik:
+    address: :59402
+
+serversTransport:
+  insecureSkipVerify: true
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      # 下面填入自己的邮箱，用来接收证书过期提醒
+      email: "email@example.com"
+      storage: /var/traefik/certs/acme.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      keyType: EC256
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+# 用来安装 Crowdsec 插件
+experimental:
+  plugins:
+    crowdsec-bouncer:
+      moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      version: "v1.4.1"

@@ -23,6 +23,7 @@ services:
       CRON_MIN: '2,32'
     networks:
         - frontend
+        - backend
     labels:
       # 参考 https://github.com/FreshRSS/FreshRSS/blob/edge/Docker/freshrss/docker-compose-proxy.yml
       - "traefik.enable=true"

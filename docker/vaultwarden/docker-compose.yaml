@@ -19,7 +19,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.bitwarden.rule=Host(`passwd.example.com`)"
-      - "traefik.http.routers.bitwarden.entrypoints=srv"
+      - "traefik.http.routers.bitwarden.entrypoints=https"
       - "traefik.http.routers.bitwarden.tls.certresolver=cloudflare"
       - "traefik.http.routers.bitwarden.service=bitwarden"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"

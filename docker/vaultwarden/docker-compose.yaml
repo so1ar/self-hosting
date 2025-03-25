@@ -11,10 +11,19 @@ services:
       SIGNUPS_ALLOWED: 'true'
       # 需要改成自己的域名
       DOMAIN: "https://passwd.example.com"
-    ports:
-      - '127.0.0.1:7080:80'
+    # ports:
+    #   - '127.0.0.1:7080:80'
     volumes:
       - vaultwarden-data:/data/
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bitwarden.rule=Host(`passwd.example.com`)"
+      - "traefik.http.routers.bitwarden.entrypoints=srv"
+      - "traefik.http.routers.bitwarden.tls.certresolver=cloudflare"
+      - "traefik.http.routers.bitwarden.service=bitwarden"
+      - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
 
   # Vaultwarden 自动备份服务
   vaultwarden-backup:
@@ -34,3 +43,7 @@ services:
 volumes:
   vaultwarden-data:
     name: vaultwarden-data
+
+networks:
+  frontend:
+    external: true

@@ -21,6 +21,8 @@ services:
       TZ: Asia/Shanghai
       # 自动化任务，在每个小时的第 2 和第 32 分钟执行一次同步
       CRON_MIN: '2,32'
+    networks:
+        - frontend
     labels:
       # 参考 https://github.com/FreshRSS/FreshRSS/blob/edge/Docker/freshrss/docker-compose-proxy.yml
       - "traefik.enable=true"
@@ -47,6 +49,8 @@ services:
       CACHE_TYPE: redis
       REDIS_URL: 'redis://redis:6379/'
       # 如有其他 RSSHub 配置也可添加到这里
+    networks:
+        - backend
 
   valkey:
     # image: redis:alpine

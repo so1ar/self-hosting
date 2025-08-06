@@ -91,7 +91,8 @@ services:
       - PEERPORT=${TR_TORRENTING_PORT}
       - USER=${TR_USER}
       - PASS=${TR_PASS}
-      - TRANSMISSION_WEB_HOME=/config/transmissionic
+      # 可选的 WEBUI 路径
+      # - TRANSMISSION_WEB_HOME=/config/transmissionic
     networks:
       - frontend
   pbh:

@@ -1,0 +1,51 @@
+[Unit]
+Description=qbittorrent container
+
+# Specify the dependencies
+Wants=network-online.target
+After=network-online.target nss-lookup.target
+
+[Container]
+ContainerName=qbittorrent
+Image=lscr.io/linuxserver/qbittorrent:latest
+
+# Enable auto-update container
+AutoUpdate=registry
+
+## 配置文件目录
+Volume=/home/deck/containers/qbittorrent:/config:z
+## 种子下载目录
+Volume=/home/deck/data/torrents:/data/torrents:z
+
+HostName=qbittorrent
+## WebUI 端口
+PublishPort=8081:8081/tcp
+## 做种端口，按需修改
+PublishPort=37886:37886/tcp
+PublishPort=37886:37886/udp
+
+## 当前用户 id，按需修改
+Environment=PUID=1000
+Environment=PGID=1000
+
+Environment=TZ=Asia/Shanghai
+
+Environment=WEBUI_PORT=8081
+
+## 做种端口，建议使用五位数不常用端口，并对应修改端口映射
+Environment=TORRENTING_PORT=37886
+
+## linuxserver.io 的容器在 rootless 模式运行时，可能需要取消注释下面三行
+#UIDMap=1000:0:1
+#UIDMap=0:1:1000
+#UIDMap=1001:1001:64536
+
+[Service]
+Restart=on-failure
+
+# Extend Timeout to allow time to pull the image
+TimeoutStartSec=300
+
+## 开机自启动，如果不想要容器开机自启，需要注释掉或删掉下面两行
+[Install]
+WantedBy=default.target

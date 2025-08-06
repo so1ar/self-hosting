@@ -2,7 +2,7 @@
 services:
   crowdsec:
     # 使用 journald 的发行版需要用 latest-debian tag
-    # image: crowdsecurity/crowdsec:latest
+    # image: crowdsecurity/crowdsec:latest-debian
     image: crowdsecurity/crowdsec:latest
     container_name: crowdsec
     restart: unless-stopped

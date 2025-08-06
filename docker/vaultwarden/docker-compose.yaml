@@ -38,6 +38,7 @@ services:
     env_file:
       # 环境变量文件
       - .env
+    network_mode: none
 
 volumes:
   vaultwarden-data:

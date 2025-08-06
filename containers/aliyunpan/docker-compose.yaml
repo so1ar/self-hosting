@@ -1,0 +1,31 @@
+---
+services:
+  sync:
+    image: tickstep/aliyunpan-sync:v0.3.7
+    container_name: aliyunpan-sync
+    restart: unless-stopped
+    mem_limit: 150mb
+    volumes:
+      # 要上传到阿里云盘的目录
+      - /mnt/share/media:/home/app/data:rw
+      - ./sync_drive:/home/app/config/sync_drive
+      # 配置文件，需要在电脑上安装阿里云盘 cli 登陆获得
+      - ./aliyunpan_config.json:/home/app/config/aliyunpan_config.json
+    environment:
+      - TZ=Asia/Shanghai
+      - ALIYUNPAN_DOWNLOAD_PARALLEL=2
+      - ALIYUNPAN_UPLOAD_PARALLEL=2
+      - ALIYUNPAN_DOWNLOAD_BLOCK_SIZE=1024
+      - ALIYUNPAN_UPLOAD_BLOCK_SIZE=10240
+      - ALIYUNPAN_PAN_DIR=/media
+      - ALIYUNPAN_SYNC_MODE=upload
+      - ALIYUNPAN_SYNC_POLICY=increment
+      - ALIYUNPAN_SYNC_CYCLE=infinity
+      - ALIYUNPAN_SYNC_DRIVE=resource
+      - ALIYUNPAN_SYNC_LOG=true
+      - ALIYUNPAN_LOCAL_DELAY_TIME=10
+    networks:
+      - backend
+networks:
+  backend:
+    external: true

@@ -1,0 +1,23 @@
+---
+services:
+  dockge:
+    image: louislam/dockge:1
+    container_name: dockge
+    mem_limit: 256mb
+    restart: unless-stopped
+    ports:
+      - 5001:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - /run/podman/podman.sock:/var/run/docker.sock:Z
+      - ./data:/app/data
+      - /home/pi/containers:/home/pi/containers
+    environment:
+      # Tell Dockge where to find the stacks
+      - DOCKGE_STACKS_DIR=/home/pi/containers
+      - DOCKGE_ENABLE_CONSOLE=true
+    networks:
+      - frontend
+networks:
+  frontend:
+    external: true

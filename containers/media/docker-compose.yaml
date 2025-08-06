@@ -1,0 +1,114 @@
+---
+services:
+  sonarr:
+    restart: unless-stopped
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    mem_limit: 150mb
+    ports:
+      - 8989:8989
+    volumes:
+      - ./sonarr-config:/config
+      # 文件下载目录，要想硬链接可用，其他容器的文件系统映射应该保持一致
+      - /mnt/share:/data
+      # 自定义脚本，为 Qbittorrent 自动添加 Tracker
+      - ./qb.sh:/usr/local/bin/qb
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - frontend
+  radarr:
+    restart: unless-stopped
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    mem_limit: 200mb
+    ports:
+      - 7878:7878
+    volumes:
+      - ./radarr-config:/config
+      - /mnt/share:/data
+      - ./qb.sh:/usr/local/bin/qb
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - frontend
+  bazarr:
+    restart: unless-stopped
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    mem_limit: 512mb
+    ports:
+      - 6767:6767
+    volumes:
+      - ./bazarr-config:/config
+      - /mnt/share:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - frontend
+  qbittorrent:
+    restart: unless-stopped
+    image: linuxserver/qbittorrent:4.6.6-libtorrentv1
+    container_name: qbittorrent
+    mem_limit: 256mb
+    ports:
+      - 8080:8080
+      - ${QB_TORRENTING_PORT}:${QB_TORRENTING_PORT}
+      - ${QB_TORRENTING_PORT}:${QB_TORRENTING_PORT}/udp
+    volumes:
+      - ./qb-config:/config
+      - /mnt/share:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - TORRENTING_PORT=${QB_TORRENTING_PORT}
+      - WEBUI_PORT=8080
+    networks:
+      - frontend
+  transmission:
+    restart: unless-stopped
+    image: linuxserver/transmission:4.0.5
+    container_name: transmission
+    mem_limit: 150mb
+    ports:
+      - 9091:9091
+      - ${TR_TORRENTING_PORT}:${TR_TORRENTING_PORT}
+      - ${TR_TORRENTING_PORT}:${TR_TORRENTING_PORT}/udp
+    volumes:
+      - ./tr-config:/config
+      - /mnt/share:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PEERPORT=${TR_TORRENTING_PORT}
+      - USER=${TR_USER}
+      - PASS=${TR_PASS}
+      - TRANSMISSION_WEB_HOME=/config/transmissionic
+    networks:
+      - frontend
+  pbh:
+    restart: unless-stopped
+    image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:latest
+    container_name: pbh
+    mem_limit: 256mb
+    ports:
+      - 9898:9898
+    volumes:
+      - ./pbh_config:/app/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - frontend
+networks:
+  frontend:
+    external: true

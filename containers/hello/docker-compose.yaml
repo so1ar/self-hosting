@@ -1,0 +1,23 @@
+services:
+  mihomo:
+    container_name: mihomo
+    image: metacubex/mihomo
+    restart: unless-stopped
+    pid: host
+    ipc: host
+    cap_add:
+      - ALL
+    volumes:
+      - ./config.yaml:/root/.config/mihomo/config.yaml:ro
+      - ./mihomo_config:/root/.config/mihomo
+    networks:
+      - frontend
+    ports:
+      - 127.0.0.1:53:53/udp
+      - 127.0.0.1:53:53/tcp
+      - 9095:9095/tcp
+      - 127.0.0.1:7890:7890/udp
+      - 127.0.0.1:7890:7890/tcp
+networks:
+  frontend:
+    external: true

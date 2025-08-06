@@ -1,0 +1,99 @@
+proxy-providers:
+  sub:
+    url: 
+    type: http
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
+proxies:
+  - name: direct
+    type: direct
+    udp: true
+
+mixed-port: 7890
+ipv6: true
+allow-lan: true
+unified-delay: false
+tcp-concurrent: true
+external-controller: 0.0.0.0:9095
+external-ui: ui
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
+geodata-mode: true
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+  asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+find-process-mode: strict
+global-client-fingerprint: chrome
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  default-nameserver:
+    - 223.5.5.5
+    - 8.8.4.4
+  ipv6: false
+  # enhanced-mode: fake-ip
+  nameserver:
+    - https://dns.cloudflare.com/dns-query
+sniffer:
+  enable: false
+rules:
+  - DOMAIN-SUFFIX,steamserver.net,steam
+  - DOMAIN-SUFFIX,cm.steampowered.com,steam
+  - DOMAIN,test.steampowered.com,steam
+  - GEOIP,lan,direct,no-resolve
+  - DOMAIN-SUFFIX,archlinux.org,proxy
+  - DOMAIN-SUFFIX,flathub.org,proxy
+  - GEOSITE,bilibili,direct
+  - GEOSITE,github,github
+  - GEOSITE,geolocation-!cn,proxy
+  - GEOSITE,google-scholar,proxy
+  - GEOSITE,google,proxy
+  - GEOSITE,category-scholar-!cn,direct
+  - GEOSITE,category-scholar-cn,direct
+  - GEOSITE,twitter,proxy
+  - GEOSITE,youtube,proxy
+  - GEOSITE,telegram,proxy
+  - GEOSITE,netflix,proxy
+  - GEOSITE,bahamut,proxy
+  - GEOSITE,spotify,proxy
+  - GEOSITE,CN,direct
+  - GEOIP,google,proxy
+  - GEOIP,netflix,proxy
+  - GEOIP,telegram,proxy
+  - GEOIP,twitter,proxy
+  - GEOIP,CN,direct
+  - MATCH,proxy
+tun:
+  enable: false
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+proxy-groups:
+  - name: proxy
+    type: select
+    proxies:
+      - sub
+      - direct
+  - name: github
+    type: select
+    proxies:
+      - proxy
+      - direct
+  - name: steam
+    type: select
+    proxies:
+      - direct
+      - proxy
+  - name: sub
+    type: select
+    use:
+      - sub
+profile:
+  store-selected: true
+  store-fake-ip: false

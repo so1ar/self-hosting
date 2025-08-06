@@ -26,16 +26,17 @@ services:
       - "traefik.http.routers.jackett.tls.certresolver=cloudflare"
       - "traefik.http.services.jackett.loadbalancer.server.port=9117"
 
-# flaresolverr 服务，用来跳过某些站点的人机验证
-  flaresolverr:
-    image: flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=Asia/Shanghai
+# byparr 服务，用来跳过某些站点的人机验证
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
     restart: unless-stopped
+    shm_size: 2gb
+    # # Uncomment below to use pproxy
+    # environment:
+    #   - PROXY=http://pproxy:8080
+    volumes:
+      - ./screenshots:/app/screenshots # (optional) For screenshots when exception occurs
     networks:
       - backend
 

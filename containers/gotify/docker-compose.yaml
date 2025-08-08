@@ -14,6 +14,8 @@ services:
       - no-new-privileges:true
     networks:
       - frontend
+      # 如果想要运行在 backend 网络中的 watchtower 能够访问 gotify，取消注释下面一行
+      # - backend
     environment:
       - TZ=Asia/Shanghai
       # 管理员账户密码，不建议直接写进 compose 文件里，推荐在 .env 文件里改，也可以在登陆网页后修改密码
@@ -33,6 +35,9 @@ services:
 networks:
   frontend:
     external: true
+  # 如果想要运行在 backend 网络中的 watchtower 能够访问 gotify，取消注释下面两行
+  # backend:
+  #   external: true
 
 volumes:
   # 用来存放日志供 Crowdsec 读取，需要提前创建 docker 卷

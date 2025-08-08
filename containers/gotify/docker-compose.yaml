@@ -1,0 +1,40 @@
+---
+services:
+  gotify:
+    # 使用自定义带日志文件的镜像
+    # image: gotify/server:logger
+    image: gotify/server:latest
+    container_name: gotify
+    volumes:
+      - ./data:/app/data
+      # 日志存放
+      - gotify-log:/var/log/gotify
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend
+    environment:
+      - TZ=Asia/Shanghai
+      # 管理员账户密码，不建议直接写进 compose 文件里，推荐在 .env 文件里改，也可以在登陆网页后修改密码
+      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_DEFAULTUSER_PASS}
+      # 可信代理地址，用来在日志中显示真实的 ip 地址，需要填上反向代理的 ip
+      - GOTIFY_SERVER_TRUSTEDPROXIES=[172.25.0.250]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gotify.entrypoints=https"
+      # 改成自己的域名
+      - "traefik.http.routers.gotify.rule=Host(`go.example.com`)"
+      - "traefik.http.routers.gotify.tls=true"
+      - "traefik.http.routers.gotify.tls.certresolver=cloudflare"
+      - "traefik.http.services.gotify.loadbalancer.server.port=80"
+      - "traefik.docker.network=frontend"
+
+networks:
+  frontend:
+    external: true
+
+volumes:
+  # 用来存放日志供 Crowdsec 读取，需要提前创建 docker 卷
+  gotify-log:
+    external: true

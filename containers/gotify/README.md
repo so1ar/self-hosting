@@ -7,7 +7,7 @@
 如果想要用 Crowdsec 读取 Gotify 的日志，需要使用本目录内的 `Dockerfile` 构建新的镜像，并在 compose 文件里修改镜像 tag 为自己创建的新镜像的 tag：
 ```shell
 # 为镜像指定 tag 为 gotify/server:logger
-docker build -t gotify/server:logger ./Dockerfile
+docker build -t gotify/server:logger .
 ```
 
 另外按照我个人的习惯，我会将日志存放在单独的 Docker 卷里，方便 Crowdsec 读取，所以要先创建对应的 docker 卷：

@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       # 安装的规则集，根据自己的需要添加
-      COLLECTIONS: "crowdsecurity/linux crowdsecurity/iptables crowdsecurity/sshd crowdsecurity/traefik LePresidente/authelia"
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/iptables crowdsecurity/sshd crowdsecurity/traefik LePresidente/authelia baudneo/gotify"
       ENROLL_KEY: ${ENROLL_KEY}
       TZ: Asia/Shanghai
       GID: "${GID-1000}"
@@ -24,6 +24,8 @@ services:
       - traefik-log:/var/log/traefik
       # authelia 日志的 docker 卷
       - authelia-log:/var/log/authelia
+      # Gotify 日志的 docker 卷
+      - gotify-log:/var/log/gotify
       # 可以根据需要自行映射其他服务日志的文件
     ports:
       - "127.0.0.1:8080:8080"
@@ -38,4 +40,6 @@ volumes:
   traefik-log:
     external: true
   authelia-log:
+    external: true
+  gotify-log:
     external: true

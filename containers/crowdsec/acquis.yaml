@@ -23,3 +23,8 @@ filenames:
  - /var/log/authelia/authelia.log
 labels:
   type: authelia
+---
+filenames:
+  - /var/log/gotify/gotify.log
+labels:
+  type: gotify

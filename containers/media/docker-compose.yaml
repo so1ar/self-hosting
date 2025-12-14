@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     image: linuxserver/sonarr:latest
     container_name: sonarr
-    mem_limit: 150mb
+    mem_limit: 200mb
     ports:
       - 8989:8989
     volumes:
@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
     image: linuxserver/bazarr:latest
     container_name: bazarr
-    mem_limit: 512mb
+    mem_limit: 256mb
     ports:
       - 6767:6767
     volumes:
@@ -99,7 +99,7 @@ services:
     restart: unless-stopped
     image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:latest
     container_name: pbh
-    mem_limit: 256mb
+    mem_limit: 512mb
     ports:
       - 9898:9898
     volumes:

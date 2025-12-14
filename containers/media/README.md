@@ -12,7 +12,7 @@ Sonarr 管理剧集，Radarr 管理电影，Bazarr 负责管理字幕，Qbittorr
 
 - `TR_USER` 和 `TR_PASS` 是 Transmission 网页面板的用户名和密码，不指定的话 Transmission 就无需登录直接能打开；
 
-- `TRANSMISSION_WEB_HOME` 是可选的 Transmission 自定义 WEBUI 路径，需要自行下载第三方 WEBUI 并制定路径；
+- `TRANSMISSION_WEB_HOME` 是可选的 Transmission 自定义 WEBUI 路径，需要自行下载第三方 WEBUI 并指定路径；
 
 - `PUID` 和 `PGID` 是宿主系统当前用户和用户组的 id，可以通过运行 `id` 命令查看当前的 id，一般都是 1000；
 

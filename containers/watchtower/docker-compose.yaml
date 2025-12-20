@@ -9,7 +9,8 @@ services:
     environment: 
       - TZ=Asia/Shanghai
       - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_ROLLING_RESTART=true
+      # Disable rolling restart since it's not recommend
+      # - WATCHTOWER_ROLLING_RESTART=true
       - WATCHTOWER_DISABLE_CONTAINERS=jackett
       - WATCHTOWER_POLL_INTERVAL=86400
       - WATCHTOWER_NOTIFICATIONS=gotify
